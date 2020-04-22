@@ -27,6 +27,8 @@ import (
 	"github.com/opencord/voltha-lib-go/v3/pkg/log"
 	"io/ioutil"
 	"os"
+        "net"
+        "strconv"
 	"strings"
 )
 
@@ -184,7 +186,8 @@ func (options *SetLogLevelOpts) Execute(args []string) error {
 
 	// Already error checked during option processing
 	host, port, _ := splitEndpoint(GlobalConfig.KvStore, defaultKvHost, defaultKvPort)
-	cm := config.NewConfigManager(client, supportedKvStoreType, host, port, int(GlobalConfig.KvStoreConfig.Timeout.Seconds()))
+	GlobalConfig.KvStore = net.JoinHostPort(host, strconv.Itoa(port))
+	cm := config.NewConfigManager(client, supportedKvStoreType, GlobalConfig.KvStore, int(GlobalConfig.KvStoreConfig.Timeout.Seconds()))
 
 	var output []LogLevelOutput
 
@@ -271,7 +274,8 @@ func (options *ListLogLevelsOpts) Execute(args []string) error {
 
 	// Already error checked during option processing
 	host, port, _ := splitEndpoint(GlobalConfig.KvStore, defaultKvHost, defaultKvPort)
-	cm := config.NewConfigManager(client, supportedKvStoreType, host, port, int(GlobalConfig.KvStoreConfig.Timeout.Seconds()))
+	GlobalConfig.KvStore = net.JoinHostPort(host, strconv.Itoa(port))
+	cm := config.NewConfigManager(client, supportedKvStoreType, GlobalConfig.KvStore, int(GlobalConfig.KvStoreConfig.Timeout.Seconds()))
 
 	ctx, cancel := context.WithTimeout(context.Background(), GlobalConfig.KvStoreConfig.Timeout)
 	defer cancel()
@@ -380,7 +384,8 @@ func (options *ClearLogLevelsOpts) Execute(args []string) error {
 
 	// Already error checked during option processing
 	host, port, _ := splitEndpoint(GlobalConfig.KvStore, defaultKvHost, defaultKvPort)
-	cm := config.NewConfigManager(client, supportedKvStoreType, host, port, int(GlobalConfig.KvStoreConfig.Timeout.Seconds()))
+	GlobalConfig.KvStore = net.JoinHostPort(host, strconv.Itoa(port))
+	cm := config.NewConfigManager(client, supportedKvStoreType, GlobalConfig.KvStore, int(GlobalConfig.KvStoreConfig.Timeout.Seconds()))
 
 	var output []LogLevelOutput
 
