@@ -17,22 +17,70 @@ package model
 
 import (
 	"github.com/jhump/protoreflect/dynamic"
+	"log"
+	"os"
 )
 
+var error = log.New(os.Stderr, "ERROR: ", 0)
+
 func GetEnumValue(val *dynamic.Message, name string) string {
-	return val.FindFieldDescriptorByName(name).GetEnumType().
-		FindValueByNumber(val.GetFieldByName(name).(int32)).GetName()
+	fd := val.FindFieldDescriptorByName(name)
+	if fd == nil {
+		error.Fatalf("fieldDescriptor is nil for : %s", name)
+	}
+
+	enumType := fd.GetEnumType()
+	if enumType == nil {
+		error.Fatalf("enumType is nil for : %s", name)
+	}
+
+	field, ok := val.GetFieldByName(name).(int32)
+	if !ok {
+		error.Fatalf("field not found for : %s", name)
+	}
+
+	eValue := enumType.FindValueByNumber(field)
+	if eValue == nil {
+		error.Fatalf("eValue is nil for : %s", name)
+	}
+
+	return eValue.GetName()
 }
 
 func SetEnumValue(msg *dynamic.Message, name string, value string) {
-	eValue := msg.FindFieldDescriptorByName(name).GetEnumType().FindValueByName(value)
+	fd := msg.FindFieldDescriptorByName(name)
+	if fd == nil {
+		error.Fatalf("fieldDescriptor is nil for : %s", name)
+	}
+
+	enumType := fd.GetEnumType()
+	if enumType == nil {
+		error.Fatalf("enumType is nil for : %s", name)
+	}
+
+	eValue := enumType.FindValueByName(value)
+	if eValue == nil {
+		error.Fatalf("eValue is nil for : %s", value)
+	}
+
 	msg.SetFieldByName(name, eValue.GetNumber())
 }
 
 func GetEnumString(msg *dynamic.Message, name string, value int32) string {
-	eValue := msg.FindFieldDescriptorByName(name).GetEnumType().FindValueByNumber(value)
-	if eValue == nil {
-		panic("eValue is nil")
+	fd := msg.FindFieldDescriptorByName(name)
+	if fd == nil {
+		error.Fatalf("fieldDescriptor is nil for : %s", name)
 	}
+
+	enumType := fd.GetEnumType()
+	if enumType == nil {
+		error.Fatalf("enumType is nil for : %s", name)
+	}
+
+	eValue := enumType.FindValueByNumber(value)
+	if eValue == nil {
+		error.Fatalf("eValue is nil for : %s", value)
+	}
+
 	return eValue.GetName()
 }
