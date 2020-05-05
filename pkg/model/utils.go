@@ -16,71 +16,69 @@
 package model
 
 import (
+	"errors"
 	"github.com/jhump/protoreflect/dynamic"
-	"log"
-	"os"
 )
 
-var error = log.New(os.Stderr, "ERROR: ", 0)
-
-func GetEnumValue(val *dynamic.Message, name string) string {
+func GetEnumValue(val *dynamic.Message, name string) (string, error) {
 	fd := val.FindFieldDescriptorByName(name)
 	if fd == nil {
-		error.Fatalf("fieldDescriptor is nil for : %s", name)
+		return "", errors.New("fieldDescriptor is nil for " + name)
 	}
 
 	enumType := fd.GetEnumType()
 	if enumType == nil {
-		error.Fatalf("enumType is nil for : %s", name)
+		return "", errors.New("enumType is nil for " + name)
 	}
 
 	field, ok := val.GetFieldByName(name).(int32)
 	if !ok {
-		error.Fatalf("field not found for : %s", name)
+		return "", errors.New("Enum integer value not found for " + name)
 	}
 
 	eValue := enumType.FindValueByNumber(field)
 	if eValue == nil {
-		error.Fatalf("eValue is nil for : %s", name)
+		return "", errors.New("Value not found for " + name)
 	}
 
-	return eValue.GetName()
+	return eValue.GetName(), nil
 }
 
-func SetEnumValue(msg *dynamic.Message, name string, value string) {
+func SetEnumValue(msg *dynamic.Message, name string, value string) error {
 	fd := msg.FindFieldDescriptorByName(name)
 	if fd == nil {
-		error.Fatalf("fieldDescriptor is nil for : %s", name)
+		return errors.New("fieldDescriptor is nil for " + name)
 	}
 
 	enumType := fd.GetEnumType()
 	if enumType == nil {
-		error.Fatalf("enumType is nil for : %s", name)
+		return errors.New("enumType is nil for " + name)
 	}
 
 	eValue := enumType.FindValueByName(value)
 	if eValue == nil {
-		error.Fatalf("eValue is nil for : %s", value)
+		return errors.New("Value not found for " + name)
 	}
 
 	msg.SetFieldByName(name, eValue.GetNumber())
+        return nil
 }
 
-func GetEnumString(msg *dynamic.Message, name string, value int32) string {
+func GetEnumString(msg *dynamic.Message, name string, value int32) (string, error) {
 	fd := msg.FindFieldDescriptorByName(name)
 	if fd == nil {
-		error.Fatalf("fieldDescriptor is nil for : %s", name)
+		return "", errors.New("fieldDescriptor is nil for " + name)
 	}
 
 	enumType := fd.GetEnumType()
 	if enumType == nil {
-		error.Fatalf("enumType is nil for : %s", name)
+		return "", errors.New("enumType is nil for " + name)
 	}
 
 	eValue := enumType.FindValueByNumber(value)
 	if eValue == nil {
-		error.Fatalf("eValue is nil for : %s", value)
+		return "", errors.New("Value not found for " + name)
 	}
 
-	return eValue.GetName()
+	return eValue.GetName(), nil
 }
